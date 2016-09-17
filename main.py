@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 def scrape_daily(url):
     r = requests.get(url)
+    r.raise_for_status()
     m = re.search(r'({"context":.+)\)', r.text)
     if not m:
         raise Exception("Unable to scrape Dailymotion URL!")
@@ -25,6 +26,7 @@ def scrape_wrestling(url):
     if not "wrestlingfreak" in url:
         url = "http://wrestlingfreak.info/cgi-bin/" + url
     r = requests.get(url, headers={'Referer': 'http://watchwrestling.uno'})
+    r.raise_for_status()
     soup = BeautifulSoup(r.text, "lxml")
     daily_iframe = soup.find("iframe", src=re.compile(r'dailymotion'))
     if not daily_iframe:
@@ -33,7 +35,10 @@ def scrape_wrestling(url):
 
 def main():
     prefix = sys.argv[1]
-    counter = 1
+    try:
+        counter = int(sys.argv[2])
+    except:
+        counter = 1
     with open("page.html") as f:
         html = f.read()
     soup = BeautifulSoup(html, "lxml")
